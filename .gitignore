@@ -1,0 +1,20 @@
+# Derleme ciktilari
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Kullaniciya ozel ayarlar
+appsettings.Development.json
+
+# Isletim sistemi
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------
+# appsettings.json BILEREK haric tutulmadi: icinde API anahtarlari
+# var ama depo private. Depo public yapilacaksa once anahtarlari
+# bosaltip gercek degerleri kullanici gizliligine (dotnet user-secrets)
+# ya da ortam degiskenine tasi.
+# ---------------------------------------------------------------

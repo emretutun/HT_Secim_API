@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HT SEÇİM — Yönetim</title>
+<style>
+  :root{
+    --zemin:#eaf5ea; --panel:#ffffff; --cizgi:#c9d4c9; --metin:#181a18;
+    --soluk:#5c625c; --vurgu:#d6001c; --yesil:#1aa04a; --sari:#f0b000; --kirmizi:#b0302c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zemin);color:var(--metin);
+       font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+  header{background:#222228;color:#fff;padding:12px 20px;display:flex;
+         align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:16px;margin:0;letter-spacing:.5px}
+  header .sag{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .rozet{padding:5px 12px;border-radius:3px;font-weight:600;font-size:12px;background:#3a3a42}
+  .rozet.ok{background:var(--yesil)} .rozet.hata{background:var(--kirmizi)}
+
+  main{padding:20px;max-width:1200px;margin:0 auto}
+  .kutu{background:var(--panel);border:1px solid var(--cizgi);border-radius:4px;
+        padding:16px;margin-bottom:16px}
+  .kutu h2{margin:0 0 12px;font-size:13px;letter-spacing:.6px;color:var(--soluk);
+           text-transform:uppercase}
+  .satir{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  label{display:block;font-size:11px;color:var(--soluk);margin-bottom:4px;
+        letter-spacing:.4px;text-transform:uppercase}
+  select,input{font:14px "Segoe UI",sans-serif;padding:7px 9px;border:1px solid var(--cizgi);
+               border-radius:3px;background:#fff;color:var(--metin)}
+  select:focus,input:focus{outline:2px solid var(--vurgu);outline-offset:-1px}
+  input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+  button{font:600 13px "Segoe UI",sans-serif;padding:9px 18px;border:0;border-radius:3px;
+         background:#3a3a42;color:#fff;cursor:pointer}
+  button:hover{filter:brightness(1.15)}
+  button.ana{background:var(--yesil)} button.ikincil{background:#6a707a}
+  button:disabled{background:#b9bfb9;cursor:not-allowed}
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:7px 9px;border-bottom:1px solid var(--cizgi);text-align:right}
+  th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+  th{font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px;
+     border-bottom:2px solid var(--cizgi)}
+  tbody tr:hover{background:#f4f8f4}
+  td input{width:130px}
+  tfoot td{font-weight:700;border-top:2px solid var(--cizgi)}
+  .kucuk{font-size:12px;color:var(--soluk)}
+  .uyari{background:#fff6d8;border:1px solid var(--sari);padding:10px 12px;
+         border-radius:3px;margin-bottom:12px}
+  .hata{background:#ffe9e7;border:1px solid var(--kirmizi);color:#7a1d1a}
+  .gizli{display:none}
+  .ozet{display:flex;gap:24px;flex-wrap:wrap;margin-top:10px}
+  .ozet div{font-size:12px;color:var(--soluk)}
+  .ozet b{display:block;font-size:18px;color:var(--metin);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>HT SEÇİM · YÖNETİM</h1>
+  <span id="surum" class="rozet">—</span>
+  <div class="sag">
+    <input id="kullanici" placeholder="Operatör adı" style="width:150px">
+    <span id="durum" class="rozet">bağlanılmadı</span>
+    <button class="ikincil" onclick="anahtarSor()">Anahtar</button>
+  </div>
+</header>
+
+<main>
+
+  <div id="mesaj" class="uyari gizli"></div>
+
+  <div class="kutu">
+    <h2>Seçim ve il</h2>
+    <div class="satir">
+      <div>
+        <label for="secim">Seçim</label>
+        <select id="secim" onchange="yukle()"></select>
+      </div>
+      <div>
+        <label for="il">İl</label>
+        <select id="il" onchange="yukle()"></select>
+      </div>
+      <button class="ikincil" onclick="yukle()">Yenile</button>
+    </div>
+  </div>
+
+  <div id="duzenle" class="gizli">
+
+    <div class="kutu">
+      <h2>Sandık ve seçmen</h2>
+      <div class="satir">
+        <div><label for="toplamSandik">Toplam sandık</label>
+             <input id="toplamSandik" type="number" min="0" oninput="hesapla()"></div>
+        <div><label for="acilanSandik">Açılan sandık</label>
+             <input id="acilanSandik" type="number" min="0" oninput="hesapla()"></div>
+        <div><label for="secmen">Kayıtlı seçmen</label>
+             <input id="secmen" type="number" min="0" oninput="hesapla()"></div>
+        <div><label for="gecersiz">Geçersiz oy</label>
+             <input id="gecersiz" type="number" min="0" oninput="hesapla()"></div>
+      </div>
+
+      <div class="ozet">
+        <div>AÇILAN SANDIK <b id="o_sandik">—</b></div>
+        <div>KATILIM <b id="o_katilim">—</b></div>
+        <div>GEÇERLİ OY <b id="o_gecerli">—</b></div>
+        <div>SON GÜNCELLEME <b id="o_zaman" style="font-size:14px">—</b></div>
+      </div>
+
+      <p class="kucuk" style="margin:10px 0 0">
+        Geçerli oy elle girilmez — aşağıdaki oyların toplamıdır.
+        Açılan sandık ve katılım yüzdeleri de bu adetlerden hesaplanır.
+      </p>
+    </div>
+
+    <div class="kutu">
+      <h2>Oylar</h2>
+      <table>
+        <thead>
+          <tr><th>Kod</th><th>Ad</th><th>Oy</th><th>Oran</th></tr>
+        </thead>
+        <tbody id="oylar"></tbody>
+        <tfoot>
+          <tr><td colspan="2">TOPLAM</td><td id="t_oy">—</td><td id="t_oran">—</td></tr>
+        </tfoot>
+      </table>
+
+      <div class="satir" style="margin-top:14px">
+        <div>
+          <label for="ekKod">Kalem ekle</label>
+          <select id="ekKod"></select>
+        </div>
+        <button class="ikincil" onclick="kalemEkle()">Ekle</button>
+      </div>
+    </div>
+
+    <div class="kutu">
+      <div class="satir">
+        <div style="flex:1">
+          <label for="aciklama">Açıklama (denetim kaydına yazılır)</label>
+          <input id="aciklama" style="width:100%" placeholder="ör. YSK 21:30 güncellemesi">
+        </div>
+        <button class="ana" id="btnKaydet" onclick="kaydet()">KAYDET</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kutu">
+    <h2>Son değişiklikler</h2>
+    <table>
+      <thead>
+        <tr><th>Zaman</th><th>Kim</th><th>Seçim</th><th>İl</th><th>Alan</th><th>Eski</th><th>Yeni</th></tr>
+      </thead>
+      <tbody id="kayitlar"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+// ---------------------------------------------------------------------
+// Anahtar tarayicida saklaniyor. Tarayici kendiliginden X-API-KEY
+// gondermedigi icin her istekte elle ekleniyor.
+// ---------------------------------------------------------------------
+const KOK = "/api/v1";
+let anahtar = localStorage.getItem("ht_anahtar") || "";
+let secenekler = null;
+
+function anahtarSor(){
+  const a = prompt("Yazma anahtari (appsettings.json -> HtSecim:YazmaAnahtari)", anahtar);
+  if(a === null) return;
+  anahtar = a.trim();
+  localStorage.setItem("ht_anahtar", anahtar);
+  basla();
+}
+
+async function cagir(yol, ayar){
+  ayar = ayar || {};
+  ayar.headers = Object.assign({"X-API-KEY": anahtar, "Content-Type":"application/json"}, ayar.headers||{});
+
+  const c = await fetch(KOK + yol, ayar);
+
+  if(c.status === 401){ throw new Error("Anahtar gecersiz. Sag ustteki Anahtar dugmesine bas."); }
+  if(!c.ok){
+    let m = c.status + " " + c.statusText;
+    try { const j = await c.json(); if(j.hata) m = j.hata; } catch(e){}
+    throw new Error(m);
+  }
+  return c.json();
+}
+
+function durum(metin, iyi){
+  const e = document.getElementById("durum");
+  e.textContent = metin;
+  e.className = "rozet " + (iyi ? "ok" : "hata");
+}
+
+function mesaj(metin, hataMi){
+  const e = document.getElementById("mesaj");
+  if(!metin){ e.className = "uyari gizli"; return; }
+  e.textContent = metin;
+  e.className = "uyari" + (hataMi ? " hata" : "");
+}
+
+function sayi(n){ return (n||0).toLocaleString("tr-TR"); }
+function yuzde(pay, payda){
+  if(!payda) return "—";
+  return "%" + (pay*100/payda).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ---------------------------------------------------------------- acilis
+async function basla(){
+  try{
+    const s = await cagir("/yonetim/secenekler");
+    secenekler = s;
+
+    doldur("secim", s.secimler.map(x => ({v:x.kod, m:x.ad + " (" + x.kod + ")"})));
+    doldur("il",    s.iller.map(x => ({v:x.plaka, m:String(x.plaka).padStart(2,"0") + " — " + x.ad})));
+
+    durum("bagli", true);
+    mesaj("");
+
+    await surumTazele();
+    await yukle();
+    await kayitlariYukle();
+  }catch(e){
+    durum("hata", false);
+    mesaj(e.message, true);
+  }
+}
+
+function doldur(id, liste){
+  const e = document.getElementById(id);
+  e.innerHTML = "";
+  for(const x of liste){
+    const o = document.createElement("option");
+    o.value = x.v; o.textContent = x.m;
+    e.appendChild(o);
+  }
+}
+
+async function surumTazele(){
+  try{
+    const s = await cagir("/saglik");
+    document.getElementById("surum").textContent =
+      "surum " + s.surum + " · " + (s.veriYasiDakika >= 0 ? s.veriYasiDakika + " dk" : "—");
+  }catch(e){}
+}
+
+// ----------------------------------------------------------------- yukle
+let mevcut = null;
+
+async function yukle(){
+  const secim = document.getElementById("secim").value;
+  const plaka = document.getElementById("il").value;
+  if(!secim || !plaka) return;
+
+  try{
+    mevcut = await cagir("/yonetim/sonuc/" + secim + "/" + plaka);
+
+    document.getElementById("toplamSandik").value = mevcut.toplamSandik;
+    document.getElementById("acilanSandik").value = mevcut.acilanSandikAdet;
+    document.getElementById("secmen").value       = mevcut.secmenSayisi;
+    document.getElementById("gecersiz").value     = mevcut.gecersizOy;
+    document.getElementById("o_zaman").textContent =
+      new Date(mevcut.guncelleme).toLocaleString("tr-TR");
+
+    const g = document.getElementById("oylar");
+    g.innerHTML = "";
+    for(const o of mevcut.oylar) satirEkle(o);
+
+    doldur("ekKod", mevcut.eklenebilir.map(x => ({v:x.kod, m:x.kod + " — " + (x.ad||"")})));
+
+    document.getElementById("duzenle").className = "";
+    hesapla();
+    mesaj("");
+  }catch(e){
+    document.getElementById("duzenle").className = "gizli";
+    mesaj(e.message, true);
+  }
+}
+
+function satirEkle(o){
+  const tr = document.createElement("tr");
+  tr.dataset.kod = o.kod;
+  tr.innerHTML =
+    "<td><b>" + o.kod + "</b></td>" +
+    "<td>" + (o.ad || "") + "</td>" +
+    "<td><input type='number' min='0' value='" + o.oy + "' oninput='hesapla()'></td>" +
+    "<td class='oran'>—</td>";
+  document.getElementById("oylar").appendChild(tr);
+}
+
+function kalemEkle(){
+  const kod = document.getElementById("ekKod").value;
+  if(!kod) return;
+  if(document.querySelector("#oylar tr[data-kod='" + kod + "']")) return;
+
+  const k = (mevcut.eklenebilir || []).find(x => x.kod === kod) || {kod:kod, ad:"", oy:0};
+  satirEkle({kod:k.kod, ad:k.ad, oy:0});
+  hesapla();
+}
+
+// --------------------------------------------------------------- hesapla
+// Panelde girilen her sey ADET. Yuzdeler API'deki formullerin aynisiyla
+// aninda gosteriliyor ki reji ekrana ne dusecegini kaydetmeden gorsun.
+function hesapla(){
+  const satirlar = [...document.querySelectorAll("#oylar tr")];
+  let toplam = 0;
+
+  for(const tr of satirlar) toplam += Number(tr.querySelector("input").value || 0);
+
+  for(const tr of satirlar){
+    const oy = Number(tr.querySelector("input").value || 0);
+    tr.querySelector(".oran").textContent = yuzde(oy, toplam);
+  }
+
+  const ts = Number(document.getElementById("toplamSandik").value || 0);
+  const as = Number(document.getElementById("acilanSandik").value || 0);
+  const se = Number(document.getElementById("secmen").value || 0);
+  const ge = Number(document.getElementById("gecersiz").value || 0);
+
+  document.getElementById("t_oy").textContent   = sayi(toplam);
+  document.getElementById("t_oran").textContent = toplam ? "%100,00" : "—";
+  document.getElementById("o_gecerli").textContent = sayi(toplam);
+  document.getElementById("o_sandik").textContent  = yuzde(as, ts);
+  document.getElementById("o_katilim").textContent = yuzde(toplam + ge, se);
+
+  const bozuk = as > ts || (se > 0 && toplam + ge > se);
+  document.getElementById("btnKaydet").disabled = bozuk;
+
+  if(bozuk)
+    mesaj(as > ts ? "Acilan sandik toplamdan fazla."
+                  : "Kullanilan oy secmen sayisindan fazla.", true);
+  else
+    mesaj("");
+}
+
+// ---------------------------------------------------------------- kaydet
+async function kaydet(){
+  const secim = document.getElementById("secim").value;
+  const plaka = document.getElementById("il").value;
+
+  const oylar = [...document.querySelectorAll("#oylar tr")].map(tr => ({
+    kod: tr.dataset.kod,
+    oy: Number(tr.querySelector("input").value || 0)
+  }));
+
+  const govde = {
+    toplamSandik:     Number(document.getElementById("toplamSandik").value || 0),
+    acilanSandikAdet: Number(document.getElementById("acilanSandik").value || 0),
+    secmenSayisi:     Number(document.getElementById("secmen").value || 0),
+    gecersizOy:       Number(document.getElementById("gecersiz").value || 0),
+    oylar:            oylar,
+    kullanici:        document.getElementById("kullanici").value || "bilinmiyor",
+    aciklama:         document.getElementById("aciklama").value || null
+  };
+
+  try{
+    const c = await cagir("/yonetim/sonuc/" + secim + "/" + plaka,
+                          {method:"PUT", body: JSON.stringify(govde)});
+
+    mesaj("Kaydedildi. " + c.degisenAlan + " alan degisti. Reji 25 saniye icinde gorecek.");
+
+    await surumTazele();
+    await kayitlariYukle();
+    await yukle();
+  }catch(e){
+    mesaj(e.message, true);
+  }
+}
+
+// ------------------------------------------------------------- denetim
+async function kayitlariYukle(){
+  try{
+    const liste = await cagir("/yonetim/degisiklikler?adet=30");
+    const g = document.getElementById("kayitlar");
+    g.innerHTML = "";
+
+    for(const d of liste){
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + new Date(d.zaman).toLocaleString("tr-TR") + "</td>" +
+        "<td>" + (d.kullanici||"") + "</td>" +
+        "<td>" + d.secim + "</td>" +
+        "<td>" + (d.il||d.plaka) + "</td>" +
+        "<td>" + d.alan + "</td>" +
+        "<td>" + (d.eski===null?"—":sayi(d.eski)) + "</td>" +
+        "<td><b>" + (d.yeni===null?"—":sayi(d.yeni)) + "</b></td>";
+      g.appendChild(tr);
+    }
+  }catch(e){}
+}
+
+// -------------------------------------------------------------- baslangic
+if(!anahtar) anahtarSor(); else basla();
+setInterval(surumTazele, 15000);
+</script>
+</body>
+</html>
