@@ -4,6 +4,20 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ---------------------------------------------------------------- adres
+//
+// Port BURADA belirleniyor, launchSettings.json'da degil.
+//
+// launchSettings.json yalnizca Visual Studio'nun okudugu bir dosya; exe
+// dogrudan calistirilinca hic okunmuyor ve Kestrel varsayilani olan
+// 5000'e dusuyor. Yayin gecesi kimse Visual Studio'dan baslatmayacagi
+// icin adres exe'nin yanindaki appsettings.json'dan geliyor.
+//
+// Besleme servisi ve C ekrani bu adrese baglaniyor - degistirilirse
+// onlarin ayar dosyalarindaki API_ADRES de degismeli.
+builder.WebHost.UseUrls(
+    builder.Configuration["HtSecim:Adres"] ?? "http://localhost:5188");
+
 // Veri deposu tekil: JSON onbellegi surum numarasina bagli tutuluyor,
 // her istekte yeniden olusturulursa onbellegin anlami kalmaz.
 builder.Services.AddSingleton<VeriDeposu>();
@@ -11,6 +25,9 @@ builder.Services.AddSingleton<VeriDeposu>();
 // Yonetim panelinin yazma islemleri. Onbellek kullanmiyor, her zaman
 // veritabanindaki guncel hali okuyor.
 builder.Services.AddScoped<YonetimDeposu>();
+
+// Ajanstan gelen tam anlik goruntuyu atomik olarak uygular.
+builder.Services.AddScoped<BeslemeDeposu>();
 
 builder.Services.AddControllers(secenek =>
 {
